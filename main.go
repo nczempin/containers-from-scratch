@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"syscall"
 )
 
@@ -33,8 +35,17 @@ func run() {
 
 }
 func child() {
-	fmt.Printf("Running %vas PID %d\n", os.Args[2:], os.Getpid())
+	fmt.Printf("Running %v as PID %d\n", os.Args[2:], os.Getpid())
 	syscall.Sethostname([]byte("Zurich"))
+
+	executableDir := filepath.Dir(".")
+	ubuntuDir := filepath.Join(executableDir, "UBUNTU")
+
+	// Now you can use ubuntuDir to chroot into
+	log.Printf("Ubuntu Dir is: %s", ubuntuDir)
+
+	must(syscall.Chroot(ubuntuDir))
+	must(syscall.Chdir("/"))
 
 	cmd := exec.Command(os.Args[2], os.Args[3:]...)
 	cmd.Stdin = os.Stdin
